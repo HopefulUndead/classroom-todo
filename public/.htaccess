@@ -1,8 +1,0 @@
-<IfModule mod_rewrite.c>
-#autorise changement URI
-    RewriteEngine On
-    RewriteCond %{REQUEST_FILENAME} !-f
-
-    # point d'entrée est tjrs index.php
-    RewriteRule ^(.*)$ index.php [QSA,L]
-</IfModule>
