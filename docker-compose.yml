@@ -47,8 +47,8 @@ services:
         environment: # var environnement
             PHP_CONTAINER: web
             # ajouté moi a postériorit test
-           # APP_ENV: dev
-            #APP_DEBUG: 1
+            APP_ENV: dev
+            APP_DEBUG: 1
             
         networks:
             - dev
