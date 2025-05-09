@@ -2,8 +2,7 @@
 FROM php:8.3-apache
 
 # permet depuis volume de pouvoir mettre à jour la conf
-# sinon bug car conflit 2 config vu que déjà définit dans docker-compose yml.
-#COPY ./apache2.conf /etc/apache2/apache2.conf
+COPY ./apache2.conf /etc/apache2/apache2.conf
 
 #Install necessary extensions : terminal linux , on y installe dépendances de linux
 RUN apt-get update && apt-get install -y \

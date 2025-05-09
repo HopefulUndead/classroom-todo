@@ -41,18 +41,14 @@ services:
         # dupplique informations afin que soit copié h24, de local à container (instantané) mais de containter à local (ex php créer fichier, cache,... ) ( !!qq secondes car réindexe )
         # chemin local : chemin docker
         volumes:
-            # !! ici bug, remplacer chemin relatif de l'hote par chemin absolus (./ )
-            #- C:\Users\Dd\Desktop\Classroom-Todo\classe-todo-symfonie:/var/www/classroom-todo # met autwsl -d docker-desktopomatiquement a jour notre code
-            - ./:/var/www/classroom-todo # met autwsl -d docker-desktopomatiquement a jour notre code
-         
-           # - .docker/web/vhost.conf:/etc/apache2/sites-enabled/000-default.conf
+            - ./:/var/www/classroom-todo # met autwsl -d docker-desktop omatiquement a jour notre code
             - .docker/web/vhost.conf:/etc/apache2/sites-enabled/000-default.conf
 
         environment: # var environnement
             PHP_CONTAINER: web
             # ajouté moi a postériorit test
-            APP_ENV: dev
-            APP_DEBUG: 1
+           # APP_ENV: dev
+            #APP_DEBUG: 1
             
         networks:
             - dev
