@@ -1,0 +1,87 @@
+services:
+    # aucune connection aux autre containers, d'où c'est le 1ER
+    db: # nom du service, à l'EXTERIEUR du container
+        # chemin d'accès : save dockerfile de la bdd, et pr migration(état de bdd a instant t = squelette de la BDD sans les données, créer classes universelles pour Doctrine ) ou pour insertion de données
+        # permet d'enregistrer BDD même si éteint via 'down'
+        build:
+            context: ./.docker/db
+            
+        # permet d'identifier les containers entre eux (dc a utiliser qd on est DANS un container)
+        container_name: db
+        
+        # tt infos de var pr dockerfile pr infos de créations
+        environment:
+            MYSQL_ROOT_PASSWORD: root # psswd root
+            MYSQL_DATABASE: db_schema # schema
+
+            MYSQL_USER: user
+            MYSQL_PASSWORD: password
+
+        # unique pr bdd
+        ports:
+            - "3306:3306" # !! web ne connait pas container/virtualisation
+            # port du pc : port qd dans un container
+            # permet d'avoir plusieurs projets avec plusieurs BDD, notammants avec distinction prod/dev
+        
+        # permet d'avoir service sur un réseau mais !! ne gère pas les permissions ni hierarchie
+        networks:
+            - dev
+    
+    web:
+        build:
+            # ici 1 container, mais on peut en avoir 2 séparés
+            context: ./.docker/web
+            
+        container_name: web
+        
+        ports:
+            - "81:80"
+
+        # lien entre contenu du docker et l'arborescence locale du projet
+        # dupplique informations afin que soit copié h24, de local à container (instantané) mais de containter à local (ex php créer fichier, cache,... ) ( !!qq secondes car réindexe )
+        # chemin local : chemin docker
+        volumes:
+            # !! ici bug, remplacer chemin relatif de l'hote par chemin absolus (./ )
+            #- C:\Users\Dd\Desktop\Classroom-Todo\classe-todo-symfonie:/var/www/classroom-todo # met autwsl -d docker-desktopomatiquement a jour notre code
+            - ./:/var/www/classroom-todo # met autwsl -d docker-desktopomatiquement a jour notre code
+         
+           # - .docker/web/vhost.conf:/etc/apache2/sites-enabled/000-default.conf
+            - .docker/web/vhost.conf:/etc/apache2/sites-enabled/000-default.conf
+
+        environment: # var environnement
+            PHP_CONTAINER: web
+            # ajouté moi a postériorit test
+            APP_ENV: dev
+            APP_DEBUG: 1
+            
+        networks:
+            - dev
+    
+    # interface web pr bdd
+    phpmyadmin:
+        build:
+            # où est l'image / son chemin
+            context: ./.docker/phpmyadmin
+            
+        container_name: phpmyadmin
+        
+        environment:
+            PMA_HOST: db # permet d'accéder à phpmyadmin, pas de liens à BDD, mais permet de communiquer à api , host = db , osef
+            
+            PMA_USER: user
+            PMA_PASSWORD: password
+        
+        ports:
+            - "8081:80" # https :x
+        
+        depends_on:
+            - db
+        
+        networks:
+            - dev
+
+# dev > test > preprod (= prod mais pas d'accès client)  > prod
+
+# !! pas service mais création du réseaux qiu permet de faire communiquer les container ensemble
+networks:
+    dev:
