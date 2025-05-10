@@ -25,7 +25,27 @@ class ClassroomRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+    public function findById(int $classroomId): ?Classroom
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.id = :classroomId')
+            ->setParameter('classroomId', $classroomId)
+            ->getQuery()
+            ->getOneOrNullResult(); ## instance objet ou null
+    }
 
+    public function userIsInClass(int $userId, int $classId): bool
+    {
+        return (bool) $this->createQueryBuilder('c')
+            ->select('1')
+            ->innerJoin('App\Entity\UserClassrom', 'uc', 'WITH', 'uc.idClassroom = c.id')
+            ->andWhere('uc.idUser = :userId')
+            ->andWhere('uc.idClassroom = :classId')
+            ->setParameter('userId', $userId)
+            ->setParameter('classId', $classId)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
         //    /**
     //     * @return Classroom[] Returns an array of Classroom objects
     //     */

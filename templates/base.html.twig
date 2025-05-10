@@ -30,7 +30,7 @@
             <div class="col-md-3 text-end">
                 {% if is_granted('IS_AUTHENTICATED') %}
                     <div class="mb-3">
-                            Glad to see you {{ app.user.firstName|lower|capitalize }} {{ app.user.lastName|capitalize }} !
+                            Glad to see you {{ app.user.firstName|lower|capitalize }} {{ app.user.lastName| upper }} !
                         <a href="{{ path('app_logout') }}" class="btn btn-outline-primary m-2">
                             Logout
                         </a>
