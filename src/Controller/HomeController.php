@@ -16,18 +16,9 @@ final class HomeController extends AbstractController
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
-        // throw $this->createAccessDeniedException("You are not allowed to access this page.");
-        if ($user) // si auth
-        {
-            return $this->render('home/my_classroom.html.twig', [
-                'user_name' => $this->getUser()->getFirstName(),
-            ]);
-        }
-        else
-        {
-            return $this->render('home/index.html.twig', [
+       # throw $this->createAccessDeniedException("You are not allowed to access this page.");
+        return $this->render('home/index.html.twig', [
                 'controller_name' => 'HomeController',
             ]);
-        }
     }
 }

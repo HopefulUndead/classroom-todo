@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello MyClassroomsController!{% endblock %}
+
+{% block body %}
+    <ul>
+        {% for classroom in classrooms %}
+            <li>
+                <a href="{{ path('app_classroom', {id: classroom.id}) }}">
+                    {{ classroom.name }}
+                </a>
+            </li>
+        {% else %}
+            <li> You aren't part of any classrooms, please contact your school administrator if you think it's an mistake </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

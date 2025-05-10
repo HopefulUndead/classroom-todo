@@ -28,7 +28,7 @@
                 </li>
             </ul>
             <div class="col-md-3 text-end">
-                {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                {% if is_granted('IS_AUTHENTICATED') %}
                     <div class="mb-3">
                             Glad to see you {{ app.user.firstName|lower|capitalize }} {{ app.user.lastName|capitalize }} !
                         <a href="{{ path('app_logout') }}" class="btn btn-outline-primary m-2">
@@ -36,6 +36,9 @@
                         </a>
                     </div>
                 {% else %}
+                    <p>
+                        Please authenticate to access your Classroom !
+                    </p>
                     <a href="{{ path('app_login') }}" class="btn btn-outline-primary me-2">
                         Login
                     </a>

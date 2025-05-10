@@ -16,7 +16,17 @@ class ClassroomRepository extends ServiceEntityRepository
         parent::__construct($registry, Classroom::class);
     }
 
-    //    /**
+    public function findByUser(int $userId): array
+    {
+        return $this->createQueryBuilder('c')
+            ->innerJoin('App\Entity\UserClassrom', 'uc', 'WITH', 'uc.idClassroom = c.id')
+            ->andWhere('uc.idUser = :userId')
+            ->setParameter('userId', $userId)
+            ->getQuery()
+            ->getResult();
+    }
+
+        //    /**
     //     * @return Classroom[] Returns an array of Classroom objects
     //     */
     //    public function findByExampleField($value): array
@@ -30,7 +40,6 @@ class ClassroomRepository extends ServiceEntityRepository
     //            ->getResult()
     //        ;
     //    }
-
     //    public function findOneBySomeField($value): ?Classroom
     //    {
     //        return $this->createQueryBuilder('c')
