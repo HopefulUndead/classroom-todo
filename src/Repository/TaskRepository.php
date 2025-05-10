@@ -16,6 +16,16 @@ class TaskRepository extends ServiceEntityRepository
         parent::__construct($registry, Task::class);
     }
 
+    public function findByClassroom(int $classroomId): array
+    {
+        return $this->createQueryBuilder('t')
+            ->innerJoin('App\Entity\UserClassrom', 'uc', 'WITH', 'uc.idClassroom = t.id')
+            ->andWhere('uc.idClassroom = :classroomId')
+            ->setParameter('classroomId', $classroomId)
+            ->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return Task[] Returns an array of Task objects
 //     */

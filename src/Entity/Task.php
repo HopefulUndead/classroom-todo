@@ -22,6 +22,9 @@ class Task
     #[ORM\Column]
     private ?int $idUser = null;
 
+    #[ORM\Column]
+    private ?\DateTimeInterface $date = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -59,6 +62,18 @@ class Task
     public function setIdUser(int $idUser): static
     {
         $this->idUser = $idUser;
+
+        return $this;
+    }
+
+    public function getDate(): ?\DateTimeInterface
+    {
+        return $this->date;
+    }
+
+    public function setDate(\DateTimeInterface $date): static
+    {
+        $this->date = $date;
 
         return $this;
     }
