@@ -39,7 +39,7 @@
         Students :
     </h3>
     <ul>
-        {% for student in users %}
+        {% for student in students %}
             {% if  student %}
                 <li>
                     {{ student.GetFirstName() | lower | capitalize}} {{ student.GetLastName() | upper }}

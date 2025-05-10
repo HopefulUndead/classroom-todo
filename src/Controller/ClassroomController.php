@@ -31,15 +31,21 @@
             $tasks =  $taskRepository->findByClassroom($id);
             #dd($tasks);
 
-            $usersInClass = $userRepository->findByClassroom($id);
+
             $classroom = $classroomRepository->findById($id);
             $teacher = $userRepository->findById($classroom->getIdTeacher());
+
+            $studentsInClass = $userRepository->findByClassroom($id); // all users
+
+            // permet d'enlever LE prof, afin d'avoir les élèves
+            $studentsInClass = array_filter($studentsInClass, fn($obj) => $obj !== $teacher);
+            $studentsInClass = array_values($studentsInClass); // réindexe
 
             $isTeacher = $user->getId() === $teacher->getId();
 
             return $this->render('classroom/index.html.twig', [
                 'tasks' => $tasks,
-                'users' => $usersInClass,
+                'students' => $studentsInClass,
                 'classroom' => $classroom,
                 'teacher' => $teacher,
                 'isTeacher' => $isTeacher,
