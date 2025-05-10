@@ -19,7 +19,7 @@ final class ClassroomController extends AbstractController
         // !!vérifier que a le droit d'être l)
         $user = $security->getUser();
         $tasks =  $TaskRepository->findByClassroom($id);
-        dd($tasks);
-        return new Response('ok class');
+        #dd($tasks);
+        return $this->render('classroom/index.html.twig', ['tasks' => $tasks]);
     }
 }

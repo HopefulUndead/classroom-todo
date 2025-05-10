@@ -22,7 +22,7 @@ class Task
     #[ORM\Column]
     private ?int $idUser = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'date')]
     private ?\DateTimeInterface $date = null;
 
     public function getId(): ?int
