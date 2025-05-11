@@ -60,17 +60,30 @@
             ,
                 ['date' => 'DESC']
             );
+            // créer un tableau local du tableau d'entité
+            $taskArray = [];
             // ajoute le nom de la personne ayant la tâche
-            foreach ($tasks as &$task) {
-                $user = $this->em->getRepository(User::class)->find($task->getIdUser());
 
-                $task["nameUser"] = [
-                    "firstName" => $user->getFirstName(),
-                    "lastName" => $user->getLastName(),
+            foreach ($tasks as $task) {
+                $entry = [
+                    'id' => $task->getId(),
+                    'name' => $task->getName(),
+                    'date' => $task->getDate(),
+                    'completed' => $task->isCompleted(),
+                    'idUser' => $task->getIdUser(),
                 ];
+
+                if ($task->getIdUser() === 0) {
+                    $entry['nameUser'] = 'Classroom';
+                } else {
+                    $user = $this->em->getRepository(User::class)->find($task->getIdUser());
+                    $entry['nameUser'] = $user->getFirstName() . ' ' . $user->getLastName();
+                }
+
+                $taskArray[] = $entry;
             }
 
-            dd($tasks);
+            dd($taskArray);
 
             $classroom = $this->em->getRepository(Classroom::class)->find($id);
 
@@ -83,7 +96,7 @@
 
 
             return $this->render('classroom/show.html.twig', [
-                'tasks' => $tasks,
+                'tasks' => $taskArray,
                 'students' => $studentsInClass,
                 'classroom' => $classroom,
                 'teacher' => $teacher,
