@@ -15,7 +15,6 @@ class ClassroomRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Classroom::class);
     }
-
     public function findByUser(int $userId): array
     {
         return $this->createQueryBuilder('c')
