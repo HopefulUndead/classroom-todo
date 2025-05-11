@@ -16,7 +16,6 @@
     {% endfor %}
     <ul>
         {% for task in tasks %}
-            {% if task.completed == false  %}
             <li>
                 <form action="{{ path('classroom_task_check',{idClassroom:classroom.GetId(), taskId:task.id}) }}">
                     <input type="checkbox" id="{{ task.id }}" name="{{ task.id }}" onchange="this.form.submit();">
@@ -25,7 +24,6 @@
                     </label>
                 </form>
             </li>
-            {% endif %}
         {% else %}
             <p> No tasks for this class </p>
         {% endfor %}

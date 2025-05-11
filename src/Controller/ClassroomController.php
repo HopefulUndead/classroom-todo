@@ -2,17 +2,21 @@
 
     namespace App\Controller;
 
+    use App\Entity\Classroom;
     use App\Entity\Task;
+    use App\Entity\UserClassrom;
     use App\Repository\ClassroomRepository;
     use App\Repository\TaskRepository;
     use App\Repository\UserRepository;
     use Doctrine\ORM\EntityManager;
     use Doctrine\ORM\EntityManagerInterface;
+    use http\Client\Curl\User;
     use phpDocumentor\Reflection\Types\Boolean;
     use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
     use Symfony\Bundle\SecurityBundle\Security;
     use Symfony\Component\Finder\Exception\AccessDeniedException;
     use Symfony\Component\HttpFoundation\Response;
+    use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
     use Symfony\Component\Routing\Attribute\Route;
     use Symfony\Component\Security\Http\Attribute\IsGranted;
     use function Symfony\Component\String\b;
@@ -20,11 +24,23 @@
     #[IsGranted('ROLE_USER', statusCode: 404)]
     final class ClassroomController extends AbstractController
     {
-        #[Route('/classroom', name: 'classroom_index')]
-        public function index(Security $security, ClassroomRepository $ClassroomRepository): Response
+        ## Attributs
+        private User $user;
+        private EntityManagerInterface $em;
+
+        ## Constructeur
+        public function __construct(Security $security, EntityManagerInterface $em)
         {
-            $user = $security->getUser();
-            $classrooms = $ClassroomRepository->findByUser($user->getId());
+            $this->user = $security(>);
+            $this->em = $em;
+        }
+
+        ## Méthodes & routes
+
+        #[Route('/classroom', name: 'classroom_index')]
+        public function index(): Response
+        {
+            $classrooms = $entityManager->getRepository(Classroom::class)->findByUser($user->getId());
 
             #dd($classrooms);
             return $this->render('classroom/index.html.twig', [
@@ -38,7 +54,10 @@
             if( $this->userIsNotInClassroom($id, $security, $classroomRepository)) throw $this->createNotFoundException("You are not allowed to access this page : you arent in this classroom");
 
             #https://symfony.com/doc/current/doctrine.html#fetching-objects-from-the-database
-            $tasks =  $entityManager->getRepository(Task::class)->findBy(['id_class' => $id]);
+            $tasks =  $entityManager->getRepository(Task::class)->findBy(
+                ['id_class' => $id,
+                'completed' => false
+                ]);
 
 
             $classroom = $classroomRepository->findById($id);
@@ -89,15 +108,23 @@
             return $this->redirectToRoute('classroom_show', ['id' => $idClassroom]);
         }
 
-
-        private function userIsNotInClassroom(int $id, Security $security, ClassroomRepository $classroomRepository): bool
+        #[Route('/classroom/{idClassroom}/add', name: 'classroom_task_add')]
+        public function add(int $idClassroom, int $taskId,  Security $security, EntityManagerInterface $entityManager, ClassroomRepository $classroomRepository):Response
         {
-            $user = $security->getUser();
+            # check que l'utilisateur est bien dans la classe
+            $this->checkUserIsInClassroom();
 
-            return ( $classroomRepository->userIsInClass(
-                    $user->getId(),
-                    $id)
-                === false);
+            return new Response('add');
         }
 
+        private function checkUserIsInClassroom(int $id, Security $security, EntityManagerInterface $entityManager)  {
+
+            if ($entityManager->getRepository(UserClassrom::class)->findBy([
+                'idClassroom' => $id,
+                'idUser' => $security->getUser()->getId()
+            ]))
+            {
+                throw new NotFoundHttpException('Not found or access denied');
+            }
+        }
     }
