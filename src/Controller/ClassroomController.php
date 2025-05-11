@@ -8,6 +8,7 @@
     use phpDocumentor\Reflection\Types\Boolean;
     use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
     use Symfony\Bundle\SecurityBundle\Security;
+    use Symfony\Component\Finder\Exception\AccessDeniedException;
     use Symfony\Component\HttpFoundation\Response;
     use Symfony\Component\Routing\Attribute\Route;
     use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -31,13 +32,8 @@
             #[Route('/classroom/{id}', name: 'classroom_show')]
         public function show(int $id, Security $security, TaskRepository $taskRepository, ClassroomRepository $classroomRepository, UserRepository $userRepository): Response
         {
-            $user = $security->getUser();
+            if( $this->userIsNotInClassroom($id, $security, $classroomRepository)) throw $this->createNotFoundException("You are not allowed to access this page : you arent in this classroom");
 
-            if ( $classroomRepository->userIsInClass(
-                $user->getId(),
-                $id)
-            === false)
-            throw $this->createNotFoundException("You are not allowed to access this page : you arent in this classroom");
 
             $tasks =  $taskRepository->findByClassroom($id);
             $classroom = $classroomRepository->findById($id);
@@ -46,6 +42,7 @@
             // permet d'enlever LE prof, afin d'avoir les élèves
             $studentsInClass = array_filter($studentsInClass, fn($obj) => $obj !== $teacher);
             $studentsInClass = array_values($studentsInClass); // réindexe
+            $user = $security->getUser();
             $isTeacher = $user->getId() === $teacher->getId();
 
             return $this->render('classroom/show.html.twig', [
@@ -57,4 +54,23 @@
             ]);
 
         }
+
+        #[Route('/classroom/{id}/{taskId}/check', name: 'classroom_task_check')]
+        public function check(int $id, Security $security, TaskRepository $taskRepository, ClassroomRepository $classroomRepository, UserRepository $userRepository): Response
+        {
+            if ($this->userIsNotInClassroom($id,$security, $classroomRepository)) throw new AccessDeniedException('You are not allowed to access this page.');
+
+            return render('classroom/check.html.twig', []);
+        }
+
+        private function userIsNotInClassroom(int $id, Security $security, ClassroomRepository $classroomRepository): bool
+        {
+            $user = $security->getUser();
+
+            return ( $classroomRepository->userIsInClass(
+                    $user->getId(),
+                    $id)
+                === false);
+        }
+
     }
