@@ -60,6 +60,17 @@
             ,
                 ['date' => 'DESC']
             );
+            // ajoute le nom de la personne ayant la tâche
+            foreach ($tasks as &$task) {
+                $user = $this->em->getRepository(User::class)->find($task->getIdUser());
+
+                $task["nameUser"] = [
+                    "firstName" => $user->getFirstName(),
+                    "lastName" => $user->getLastName(),
+                ];
+            }
+
+            dd($tasks);
 
             $classroom = $this->em->getRepository(Classroom::class)->find($id);
 
@@ -69,6 +80,7 @@
             // permet d'enlever LE prof, afin d'avoir les élèves
             $studentsInClass = array_filter($studentsInClass, fn($obj) => $obj !== $teacher);
             $studentsInClass = array_values($studentsInClass); // réindexe
+
 
             return $this->render('classroom/show.html.twig', [
                 'tasks' => $tasks,
@@ -117,7 +129,7 @@
             return new Response('add');
         }
 
-        
+
         ## à remplacer par Security/Vendor
         private function checkUserIsInClassroom(int $id): void
         {
