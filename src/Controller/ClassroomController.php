@@ -60,14 +60,35 @@
 
         }
 
-        #[Route('/classroom/{id}/{taskId}/check', name: 'classroom_task_check')]
-        public function check(int $id, Security $security, TaskRepository $taskRepository, ClassroomRepository $classroomRepository, UserRepository $userRepository)
+        #[Route('/classroom/{idClassroom}/{taskId}/check', name: 'classroom_task_check')]
+        public function check(int $idClassroom, int $taskId,  Security $security, EntityManagerInterface $entityManager, ClassroomRepository $classroomRepository):Response
         {
-            if ($this->userIsNotInClassroom($id,$security, $classroomRepository)) throw new AccessDeniedException('You are not allowed to access this page.');
+            # check que l'utilisateur est bien dans la classe
+            if ($this->userIsNotInClassroom($idClassroom,$security, $classroomRepository)) throw new AccessDeniedException('You are not allowed to access this page.');
 
+            # check que task existe et qu'elle dans cette classe (2eme verif superflue ?)
+            if ($entityManager->getRepository(Task::class)->findBy([
+                'id_class' => $idClassroom,
+                'id' => $taskId,
+                'completed' => false,]))
+            {
+                $entityManager->getRepository(Task::class)->find($taskId)->setCompleted(true);
+                $entityManager->flush();
 
-            $this->redirectToRoute('classroom_show', ['id' => $id]);
+                # flash message, equivalent alert() en js
+                $this->addFlash(
+                    'success ', # bootstrap alert styling
+                    'Congrats ! You finished a task !'
+                );
+            }
+            else $this->addFlash(
+                'danger', # bootstrap alert styling
+                'An error occurred'
+            );
+
+            return $this->redirectToRoute('classroom_show', ['id' => $idClassroom]);
         }
+
 
         private function userIsNotInClassroom(int $id, Security $security, ClassroomRepository $classroomRepository): bool
         {

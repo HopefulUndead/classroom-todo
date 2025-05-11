@@ -7,14 +7,23 @@
     <h2>
         Today's Task (à modif date)
     </h2>
+    {% for type,messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ type }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
     <ul>
         {% for task in tasks %}
-            {% if  task.completed  == false %}
+            {% if task.completed == false  %}
             <li>
-                <input type="checkbox" id="{{ task.id }}" name="{{ task.id }}" value="Bike">
-                <label for="{{ task.id }}">
-                    {{ task.name }} :  {{ task.idUser }}
-                </label>
+                <form action="{{ path('classroom_task_check',{idClassroom:classroom.GetId(), taskId:task.id}) }}">
+                    <input type="checkbox" id="{{ task.id }}" name="{{ task.id }}" onchange="this.form.submit();">
+                    <label for="{{ task.id }}">
+                        {{ task.name }} :  {{ task.idUser }} : due the : {{ task.date |date("m/d/Y") }}
+                    </label>
+                </form>
             </li>
             {% endif %}
         {% else %}
