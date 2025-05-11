@@ -29,6 +29,7 @@ class TaskNewForm extends AbstractType
             ->add('idUser', EntityType::class, [
                 'class' => User::class,
                 'choice_label' => 'last_name',
+                'em' => ,
                 'constraints' => [
                     new NotBlank([
                         'message' => "Please select a user"
@@ -38,6 +39,8 @@ class TaskNewForm extends AbstractType
 
             ->add('date', DateType::class, [
                 'widget' => 'choice',
+                'format' => 'dd-MM-yyyy',
+                'html5' => false,
                 'constraints' => [
                     new NotBlank([
                         'message' => "Please enter the task's name"
