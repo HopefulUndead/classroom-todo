@@ -6,6 +6,7 @@
     use App\Entity\Task;
     use App\Entity\UserClassrom;
     use App\Entity\User;
+    use App\Form\TaskNewForm;
     use App\Repository\ClassroomRepository;
     use App\Repository\TaskRepository;
     use App\Repository\UserRepository;
@@ -15,6 +16,7 @@
     use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
     use Symfony\Bundle\SecurityBundle\Security;
     use Symfony\Component\Finder\Exception\AccessDeniedException;
+    use Symfony\Component\HttpFoundation\Request;
     use Symfony\Component\HttpFoundation\Response;
     use Symfony\Component\HttpKernel\Exception\HttpException;
     use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -49,7 +51,7 @@
         }
 
         #[Route('/classroom/{id}', name: 'classroom_show')]
-        public function show(int $id): Response
+        public function show(int $id, Request $request): Response
         {
             $this->checkUserIsInClassroom($id);
 
@@ -83,8 +85,6 @@
                 $taskArray[] = $entry;
             }
 
-            dd($taskArray);
-
             $classroom = $this->em->getRepository(Classroom::class)->find($id);
 
             $teacher = $this->em->getRepository(User::class)->find($classroom->getIdTeacher());
@@ -93,14 +93,38 @@
             // permet d'enlever LE prof, afin d'avoir les élèves
             $studentsInClass = array_filter($studentsInClass, fn($obj) => $obj !== $teacher);
             $studentsInClass = array_values($studentsInClass); // réindexe
+            $isTeacher = $this->user->getId() === $teacher->getId();
 
+            $form = null;
+            if ($isTeacher)
+            {
+                $task = new Task();
+                $form = $this->createForm(TaskNewForm::class, $task);
+                $form->handleRequest($request);
+
+                if ($form->isSubmitted() && $form->isValid()) {
+                    $this->addFlash(
+                        'success ',
+                        'Congrats ! You finished a task !'
+                    );
+
+                    $task->setIdClass($id);
+                    $task->setCompleted(false);
+
+                    $this->em->persist($task);
+                    $this->em->flush();
+
+                    return $this->redirectToRoute('classroom_show');
+                }
+            }
 
             return $this->render('classroom/show.html.twig', [
                 'tasks' => $taskArray,
                 'students' => $studentsInClass,
                 'classroom' => $classroom,
                 'teacher' => $teacher,
-                'isTeacher' => $this->user->getId() === $teacher->getId(),
+                'isTeacher' => $isTeacher,
+                'tasknewform' => $form,
             ]);
 
         }
@@ -133,15 +157,6 @@
 
             return $this->redirectToRoute('classroom_show', ['id' => $idClassroom]);
         }
-
-        #[Route('/classroom/{idClassroom}/add', name: 'classroom_task_add')]
-        public function add(int $idClassroom, int $taskId):Response
-        {
-            $this->checkUserIsInClassroom($idClassroom);
-
-            return new Response('add');
-        }
-
 
         ## à remplacer par Security/Vendor
         private function checkUserIsInClassroom(int $id): void
