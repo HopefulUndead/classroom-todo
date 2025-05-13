@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -13,9 +14,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Id] # clef primaire
+    #[ORM\GeneratedValue] # AIncrement
+    #[ORM\Column] # colonne de table, sinon entité aura info mais pas dans BDD
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
@@ -39,6 +40,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 20)]
     private ?string $first_name = null;
 
+    // vu que pas attribut Colonne ne sera pas définit dans BDD, seulement dans entité
+    /**
+     * @var Collection<int, User>
+     */
+    #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'id', orphanRemoval: true)]
+    private Collection $Teacher;
+
+#-----
     public function getId(): ?int
     {
         return $this->id;

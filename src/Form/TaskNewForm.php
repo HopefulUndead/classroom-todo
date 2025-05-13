@@ -36,7 +36,7 @@ class TaskNewForm extends AbstractType
             ])
 
             // normalement entityType mais besoin de relation many à doctrine...
-            ->add('idUser', ChoiceType::class, [
+            ->add('idUser', EntityType::class, [
                     'choices' => $this->userRepository->findByClassroom($options['classroomId']),
                     'choice_value' => 'id',
                     'choice_label' => function ($user) {

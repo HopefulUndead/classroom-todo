@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\ClassroomRepository;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ClassroomRepository::class)]
@@ -16,8 +17,13 @@ class Classroom
     #[ORM\Column(length: 20)]
     private ?string $name = null;
 
-    #[ORM\Column]
-    private ?int $id_teacher = null;
+
+    #[ORM\ManyToOne(inversedBy: 'Classroom')]
+    #[ORM\JoinColumn(name: 'TEACHER_ID', nullable: false)]
+    private ?User $TeacherId = null;
+
+
+    #-----------------------------------------------------------
 
     public function getId(): ?int
     {
@@ -36,15 +42,13 @@ class Classroom
         return $this;
     }
 
-    public function getIdTeacher(): ?int
+    public function getTeacherId(): ?User
     {
-        return $this->id_teacher;
+        return $this->TeacherId;
     }
 
-    public function setIdTeacher(int $id_teacher): static
+    public function setTeacherId(?User $TeacherId): void
     {
-        $this->id_teacher = $id_teacher;
-
-        return $this;
+        $this->TeacherId = $TeacherId;
     }
 }
