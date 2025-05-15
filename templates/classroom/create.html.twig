@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create Classroom {% endblock %}
+
+{% block body %}
+    <h1>Create a Classroom</h1>
+
+    {{ form_errors(classroomForm) }}
+
+    {{ form_start(classroomForm) }}
+    {{ form_row(classroomForm.name) }}
+    {{ form_row(classroomForm.students) }}
+
+    <button type="submit" class="btn btn-primary">Create</button>
+    {{ form_end(classroomForm) }}
+{% endblock %}

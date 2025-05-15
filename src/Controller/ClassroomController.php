@@ -6,6 +6,7 @@
     use App\Entity\Task;
     use App\Entity\UserClassrom;
     use App\Entity\User;
+    use App\Form\ClassroomNewForm;
     use App\Form\TaskNewForm;
     use App\Repository\ClassroomRepository;
     use App\Repository\TaskRepository;
@@ -48,13 +49,35 @@
             ]);
         }
 
-        #[Route('/classroom', name: 'classroom_create')]
-        public function index(): Response
+        #[Route('/classroom/create', name: 'classroom_create')]
+        public function create(Request $request, EntityManagerInterface $entityManager): Response
         {
-            $classrooms = $this->user->getClassrooms();
+            $classroom = new Classroom();
 
-            return $this->render('classroom/index.html.twig', [
-                'classrooms' => $classrooms,
+            $form = $this->createForm(ClassroomNewForm::class, $classroom, ['current_user' => $this->user]); //! a bien spécifier le nouveau paramètre, sinon config/services.yaml
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                $classroom->setTeacherId($this->user->getId());
+
+                $entityManager->persist($classroom);
+                $entityManager->flush();
+
+                $this->addFlash(
+                    'success',
+                    'Congrats ! You create a classroom !'
+                );
+                return $this->redirectToRoute('classroom_index');
+            }
+            else if ($form->isSubmitted() && !$form->isValid()) {
+                $this->addFlash(
+                    'error',
+                    'An error occurred while creating classroom'
+                );
+                return $this->redirectToRoute('classroom_index');
+            }
+            return $this->render('classroom/create.html.twig', [
+                'classroomForm' => $form->createView(),
             ]);
         }
 
@@ -112,7 +135,7 @@
 
                 if ($form->isSubmitted() && $form->isValid()) {
                     $this->addFlash(
-                        'success ',
+                        'success',
                         'Congrats ! You finished a task !'
                     );
 
@@ -154,7 +177,7 @@
 
                 # flash message, equivalent alert() en js
                 $this->addFlash(
-                    'success ', # bootstrap alert styling
+                    'success', # bootstrap alert styling
                     'Congrats ! You finished a task !'
                     );
             }
