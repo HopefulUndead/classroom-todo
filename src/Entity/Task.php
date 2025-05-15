@@ -19,15 +19,27 @@ class Task
     #[ORM\Column]
     private ?bool $completed = null;
 
-    #[ORM\Column]
-    private ?int $idUser = null;
+    #[ORM\ManyToOne(inversedBy: 'Task')]
+    #[ORM\JoinColumn(name: 'USER_ID', nullable: false)]
+    private ?User $userId = null;
 
     #[ORM\Column(type: 'date')]
     private ?\DateTimeInterface $date = null;
+    #[ORM\ManyToOne(inversedBy: 'Task')]
+    #[ORM\JoinColumn(name: 'CLASSROOM_ID', nullable: false)]
+    private ?Classroom $classId = null;
 
-    #[ORM\Column]
-    private ?int $id_class = null;
 
+    # --------------------
+    public function getUserId(): ?User
+    {
+        return $this->userId;
+    }
+
+    public function setUserId(?User $userId): void
+    {
+        $this->userId = $userId;
+    }
     public function getId(): ?int
     {
         return $this->id;
@@ -57,18 +69,6 @@ class Task
         return $this;
     }
 
-    public function getIdUser(): ?int
-    {
-        return $this->idUser;
-    }
-
-    public function setIdUser(int $idUser): static
-    {
-        $this->idUser = $idUser;
-
-        return $this;
-    }
-
     public function getDate(): ?\DateTimeInterface
     {
         return $this->date;
@@ -81,15 +81,13 @@ class Task
         return $this;
     }
 
-    public function getIdClass(): ?int
+    public function getClassId(): ?Classroom
     {
-        return $this->id_class;
+        return $this->classId;
     }
 
-    public function setIdClass(int $id_class): static
+    public function setClassId(?Classroom $classId): void
     {
-        $this->id_class = $id_class;
-
-        return $this;
+        $this->classId = $classId;
     }
 }

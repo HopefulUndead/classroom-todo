@@ -29,13 +29,11 @@
     {
         ## Attributs
         private User $user;
-        private EntityManagerInterface $em;
 
         ## Constructeur
-        public function __construct(Security $security, EntityManagerInterface $em)
+        public function __construct(Security $security)
         {
             $this->user = $security->getUser();
-            $this->em = $em;
         }
 
         ## Méthodes & routes
@@ -43,7 +41,17 @@
         #[Route('/classroom', name: 'classroom_index')]
         public function index(): Response
         {
-            $classrooms = $this->em->getRepository(Classroom::class)->findByUser($this->user->getId());
+            $classrooms = $this->user->getClassrooms();
+
+            return $this->render('classroom/index.html.twig', [
+                'classrooms' => $classrooms,
+            ]);
+        }
+
+        #[Route('/classroom', name: 'classroom_create')]
+        public function index(): Response
+        {
+            $classrooms = $this->user->getClassrooms();
 
             return $this->render('classroom/index.html.twig', [
                 'classrooms' => $classrooms,
@@ -158,9 +166,12 @@
             return $this->redirectToRoute('classroom_show', ['id' => $idClassroom]);
         }
 
-        ## à remplacer par Security/Vendor
+        ## à remplacer par Security>Vendor
         private function checkUserIsInClassroom(int $id): void
         {
+            # https://www.doctrine-project.org/projects/doctrine-collections/en/1.6/index.html
+            $this->user->getClassrooms()->contains($this->user);
+
             if ($this->em->getRepository(UserClassrom::class)->findBy([
                 'idClassroom' => $id,
                 'idUser' => $this->user->getId()

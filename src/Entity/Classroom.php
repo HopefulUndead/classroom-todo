@@ -17,13 +17,27 @@ class Classroom
     #[ORM\Column(length: 20)]
     private ?string $name = null;
 
-
     #[ORM\ManyToOne(inversedBy: 'Classroom')]
     #[ORM\JoinColumn(name: 'TEACHER_ID', nullable: false)]
     private ?User $TeacherId = null;
 
+    /**
+     * @var Collection <int, User>
+     */
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'classrooms')]
+    private Collection $students;
 
     #-----------------------------------------------------------
+    public function getStudents(): Collection
+    {
+        return $this->students;
+    }
+
+    public function setStudents(Collection $students): void
+    {
+        $this->students = $students;
+    }
+
 
     public function getId(): ?int
     {

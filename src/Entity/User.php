@@ -40,12 +40,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 20)]
     private ?string $first_name = null;
 
-    // vu que pas attribut Colonne ne sera pas définit dans BDD, seulement dans entité
     /**
-     * @var Collection<int, User>
+     * @var Collection <int, Classroom>
      */
-    #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'id', orphanRemoval: true)]
-    private Collection $Teacher;
+    #[ORM\ManyToMany(targetEntity: Classroom::class, inversedBy: 'students')] // students est nom définit dans Classroom.php (!! nom d'attribut dans entité dc pas celui de bdd!)
+    private Collection $classrooms;
+
+    # -------------------------
+    public function getClassrooms(): Collection
+    {
+        return $this->classrooms;
+    }
+
+    public function setClassrooms(Collection $classrooms): void
+    {
+        $this->classrooms = $classrooms;
+    }
 
 #-----
     public function getId(): ?int
