@@ -34,7 +34,7 @@ class ClassroomNewForm extends AbstractType
                 ],
             ])
 
-            ->add('students', EntityType::class, [
+            ->add('usersInClassroom', EntityType::class, [
                 'class' => User::class,
                 'choice_label' => 'last_name',
                 'multiple' => true,
@@ -42,6 +42,7 @@ class ClassroomNewForm extends AbstractType
                 'expanded' => true,
                 'placeholder' => 'Choose the students',
                 #https://symfony.com/doc/current/reference/forms/types/entity.html#using-a-custom-query-for-the-entities
+                // permet de ne pas montrer prof dans choix des élèves, en soit pas grave car on l'ajoute ensuite mais esthétiuement c pas fou
                 'query_builder' => static function (UserRepository $r) use ($current) {
                     return $r->createQueryBuilder('u')
                         ->where('u.id != :id')

@@ -43,7 +43,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection <int, Classroom>
      */
-    #[ORM\ManyToMany(targetEntity: Classroom::class, inversedBy: 'students')] // students est nom définit dans Classroom.php (!! nom d'attribut dans entité dc pas celui de bdd!)
+    #[ORM\ManyToMany(targetEntity: Classroom::class, mappedBy: 'usersInClassroom')] // students est nom définit dans Classroom.php (!! nom d'attribut dans entité dc pas celui de bdd!)
     private Collection $classrooms;
 
     # -------------------------

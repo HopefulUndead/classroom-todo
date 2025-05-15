@@ -11,6 +11,7 @@
     use App\Repository\ClassroomRepository;
     use App\Repository\TaskRepository;
     use App\Repository\UserRepository;
+    use Doctrine\Common\Collections\ArrayCollection;
     use Doctrine\ORM\EntityManager;
     use Doctrine\ORM\EntityManagerInterface;
     use phpDocumentor\Reflection\Types\Boolean;
@@ -58,7 +59,11 @@
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
-                $classroom->setTeacherId($this->user->getId());
+                $classroom->setTeacherId($this->user);
+
+                $userInClassroom = $form->get('usersInClassroom')->getData();
+                $userInClassroom->add($this->user);
+                $classroom->setUsersInClassroom($userInClassroom);
 
                 $entityManager->persist($classroom);
                 $entityManager->flush();

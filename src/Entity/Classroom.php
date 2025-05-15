@@ -24,18 +24,19 @@ class Classroom
     /**
      * @var Collection <int, User>
      */
-    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'classrooms')]
-    private Collection $students;
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'classrooms')] // propriétaire car pas mapping
+    // #[ORM\JoinTable(name: 'user_classroom')] possibilité de spécifier nom mais par défaut 'proprio_subordoné'
+    private Collection $usersInClassroom;
 
     #-----------------------------------------------------------
-    public function getStudents(): Collection
+    public function getUsersInClassroom(): Collection
     {
-        return $this->students;
+        return $this->usersInClassroom;
     }
 
-    public function setStudents(Collection $students): void
+    public function setUsersInClassroom(Collection $usersInClassroom): void
     {
-        $this->students = $students;
+        $this->usersInClassroom = $usersInClassroom;
     }
 
 
