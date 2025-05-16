@@ -4,7 +4,6 @@
 
     use App\Entity\Classroom;
     use App\Entity\Task;
-    use App\Entity\UserClassrom;
     use App\Entity\User;
     use App\Form\ClassroomNewForm;
     use App\Form\TaskNewForm;
@@ -26,24 +25,30 @@
     use Symfony\Component\Security\Http\Attribute\IsGranted;
     use function Symfony\Component\String\b;
 
+
+    // !! dans controlleur jamais attributs utilisateurs !!
+    // utilisateur n'est pas censé être connu à l'extérieur d'une route
+    // sous méthode d'une route transmetttre utilisateur OK, mais pas classe d'un controlleur
+
     #[IsGranted('ROLE_USER', statusCode: 404)]
     final class ClassroomController extends AbstractController
     {
         ## Attributs
-        private User $user;
 
         ## Constructeur
-        public function __construct(Security $security)
-        {
-            $this->user = $security->getUser();
-        }
+        // atributs déclarés dans constructeurs et accessible dans fichier php8
+    public function __construct(
+        private readonly EntityManagerInterface $em)
 
+    {
+
+    }
         ## Méthodes & routes
 
         #[Route('/classroom', name: 'classroom_index')]
         public function index(): Response
         {
-            $classrooms = $this->user->getClassrooms();
+            $classrooms = $this->getUser()->getClassrooms();
 
             return $this->render('classroom/index.html.twig', [
                 'classrooms' => $classrooms,
@@ -55,14 +60,14 @@
         {
             $classroom = new Classroom();
 
-            $form = $this->createForm(ClassroomNewForm::class, $classroom, ['current_user' => $this->user]); //! a bien spécifier le nouveau paramètre, sinon config/services.yaml
+            $form = $this->createForm(ClassroomNewForm::class, $classroom, ['current_user' => $this->getUser()]); //! a bien spécifier le nouveau paramètre, sinon config/services.yaml
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
-                $classroom->setTeacherId($this->user);
+                $classroom->setTeacherId($this->getUser());
 
                 $userInClassroom = $form->get('usersInClassroom')->getData();
-                $userInClassroom->add($this->user);
+                $userInClassroom->add($this->getUser());
                 $classroom->setUsersInClassroom($userInClassroom);
 
                 $entityManager->persist($classroom);
@@ -91,68 +96,65 @@
         {
             $this->checkUserIsInClassroom($id);
 
-            $tasks =  $this->em->getRepository(Task::class)->findBy(
-                ['id_class' => $id,
-                'completed' => false
-                ]
-            ,
-                ['date' => 'DESC']
+            $tasks = $this->em->getRepository(Task::class)->findBy([
+                'classId' => $id,
+                'completed' => false ],
+                ['date' => 'ASC']
             );
+
             // créer un tableau local du tableau d'entité
             $taskArray = [];
             // ajoute le nom de la personne ayant la tâche
-
             foreach ($tasks as $task) {
                 $entry = [
                     'id' => $task->getId(),
                     'name' => $task->getName(),
                     'date' => $task->getDate(),
                     'completed' => $task->isCompleted(),
-                    'idUser' => $task->getIdUser(),
+                    '$userId' => $task->getUserId(),
                 ];
-
-                if ($task->getIdUser() === 0) {
+                if ($task->getUserId() === 0) {
                     $entry['nameUser'] = 'Classroom';
                 } else {
-                    $user = $this->em->getRepository(User::class)->find($task->getIdUser());
+                    $user = $this->em->getRepository(User::class)->find($task->getUserId());
                     $entry['nameUser'] = $user->getFirstName() . ' ' . $user->getLastName();
                 }
-
                 $taskArray[] = $entry;
             }
 
             $classroom = $this->em->getRepository(Classroom::class)->find($id);
 
-            $teacher = $this->em->getRepository(User::class)->find($classroom->getIdTeacher());
+            $teacher = $this->em->getRepository(User::class)->find($classroom->getTeacherId());
 
-            $studentsInClass = $this->em->getRepository(User::class)->findByClassroom($id);
-            // permet d'enlever LE prof, afin d'avoir les élèves
-            $studentsInClass = array_filter($studentsInClass, fn($obj) => $obj !== $teacher);
-            $studentsInClass = array_values($studentsInClass); // réindexe
-            $isTeacher = $this->user->getId() === $teacher->getId();
+            $studentsInClass = $classroom->getUsersInClassroom();
+
+            $isTeacher = $this->getUser()->getId() === $teacher->getId();
 
             $form = null;
             if ($isTeacher)
             {
                 $task = new Task();
-                $form = $this->createForm(TaskNewForm::class, $task);
+                $task->setDate(new \DateTime()); // placeholder date du jour
+                $form = $this->createForm(TaskNewForm::class, $task, ['classroom' => $classroom]);
                 $form->handleRequest($request);
 
-                if ($form->isSubmitted() && $form->isValid()) {
-                    $this->addFlash(
-                        'success',
-                        'Congrats ! You finished a task !'
-                    );
-
-                    $task->setIdClass($id);
+                if ($form->isSubmitted() && $form->isValid())
+                {
+                    $task->setClassId($this->em->getRepository(Classroom::class)->find($id));
                     $task->setCompleted(false);
 
                     $this->em->persist($task);
                     $this->em->flush();
 
-                    return $this->redirectToRoute('classroom_show');
+                    $this->addFlash(
+                        'success',
+                        'Congrats ! You finished a task !'
+                    );
+                    return $this->redirectToRoute('classroom_show', ['id' => $id]);
                 }
             }
+
+            $studentsInClass->removeElement($teacher); //permet d'afficher dans la vue sans le prof mais sans le flush() non plus dans me formulaire
 
             return $this->render('classroom/show.html.twig', [
                 'tasks' => $taskArray,
@@ -162,17 +164,16 @@
                 'isTeacher' => $isTeacher,
                 'tasknewform' => $form,
             ]);
-
         }
 
         #[Route('/classroom/{idClassroom}/{taskId}/check', name: 'classroom_task_check')]
-        public function check(int $idClassroom, int $taskId):Response
+        public function check(int $idClassroom, int $taskId ):Response
         {
             $this->checkUserIsInClassroom($idClassroom);
 
             # check que task existe et qu'elle dans cette classe
             if ($this->em->getRepository(Task::class)->findBy([
-                'id_class' => $idClassroom,
+                'classId' => $idClassroom,
                 'id' => $taskId,
                 'completed' => false,
                     ]))
@@ -197,15 +198,14 @@
         ## à remplacer par Security>Vendor
         private function checkUserIsInClassroom(int $id): void
         {
-            # https://www.doctrine-project.org/projects/doctrine-collections/en/1.6/index.html
-            $this->user->getClassrooms()->contains($this->user);
+            $classroom = $this->em->getRepository(Classroom::class)->find($id);
 
-            if ($this->em->getRepository(UserClassrom::class)->findBy([
-                'idClassroom' => $id,
-                'idUser' => $this->user->getId()
-            ]) == null)
-            {
-                throw new NotFoundHttpException('Not found or access denied');
+            if (!$classroom) {
+                throw new NotFoundHttpException('Classroom not found');
+            }
+
+            if (!$classroom->getUsersInClassroom()->contains($this->getUser())) {
+                throw new NotFoundHttpException('Access denied');
             }
         }
     }

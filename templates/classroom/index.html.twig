@@ -1,7 +1,25 @@
 {% extends 'base.html.twig' %}
 
+
 {% block body %}
-<ul>
+
+    <h1>
+        Classroom
+    </h1>
+
+    {% for type,messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ type }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+    
+    <h2>
+        My classrooms :
+    </h2>
+
+    <ul>
     {% for classroom in classrooms %}
     <li>
         <a href="{{ path('classroom_show', {id: classroom.id}) }}">
@@ -12,4 +30,14 @@
             <li> You aren't part of any classrooms, please contact your school administrator if you think it's an mistake </li>
         {% endfor %}
     </ul>
+
+    <h2>
+        Create a classroom :
+    </h2>
+
+    <a href="{{ path('classroom_create') }}" class="btn btn-primary"> Create a classroom </a>
+
+    <p>
+
+    </p>
 {% endblock %}

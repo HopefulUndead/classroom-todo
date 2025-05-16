@@ -6,6 +6,8 @@ use App\Entity\Classroom;
 use App\Entity\Task;
 use App\Entity\User;
 use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -17,13 +19,12 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 
 class TaskNewForm extends AbstractType
 {
-    private UserRepository $userRepository;
 
-    public function __construct(UserRepository $userRepository)
+    private EntityManagerInterface $em;
+    public function __construct(EntityManagerInterface $em)
     {
-        $this->userRepository = $userRepository;
+        $this->em = $em;
     }
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -35,10 +36,11 @@ class TaskNewForm extends AbstractType
                 ]
             ])
 
-            // normalement entityType mais besoin de relation many à doctrine...
-            ->add('idUser', EntityType::class, [
-                    'choices' => $this->userRepository->findByClassroom($options['classroomId']),
+            ->add('userId', EntityType::class, [
+                    'class' => User::class,
+                    'choices' => $options['classroom']->getUsersInClassroom(),
                     'choice_value' => 'id',
+                    'expanded' => true,
                     'choice_label' => function ($user) {
                         return $user->getLastName();
                     },
@@ -47,6 +49,7 @@ class TaskNewForm extends AbstractType
             ->add('date', DateType::class, [
                 'widget' => 'choice',
                 'format' => 'dd-MM-yyyy',
+                'attr' => ['placeholder' => 'jj/mm/aaaa'],
                 'html5' => false,
                 'constraints' => [
                     new NotBlank([
@@ -57,10 +60,13 @@ class TaskNewForm extends AbstractType
         ;
     }
 
+    //https://symfony.com/doc/current/forms.html#passing-options-to-forms
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Task::class,
+            'classroom' => null,
         ]);
-    }
+        $resolver->setRequired('classroom');
+        $resolver->setAllowedTypes('classroom', [Classroom::class]);    }
 }

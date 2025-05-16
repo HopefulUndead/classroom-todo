@@ -20,7 +20,7 @@
                 <form action="{{ path('classroom_task_check',{idClassroom:classroom.GetId(), taskId:task.id}) }}">
                     <input type="checkbox" id="{{ task.id }}" name="{{ task.id }}" onchange="this.form.submit();">
                     <label for="{{ task.id }}">
-                        {{ task.name }} :  {{ task.nameUser }} : due the : {{ task.date |date("m/d/Y") }}
+                        {{ task.name }} :  {{ task.nameUser }} : due the : {{ task.date |date("l d F Y") }}
                     </label>
                 </form>
             </li>
@@ -28,6 +28,7 @@
             <p> No tasks for this class </p>
         {% endfor %}
     </ul>
+
     {% if isTeacher %}
     <div>
         {{ form_errors(tasknewform) }}
@@ -40,7 +41,7 @@
         {{ form_row(tasknewform.name, {
             label: "Task's Description :"
         }) }}
-        {{ form_row(tasknewform.idUser , {
+        {{ form_row(tasknewform.userId , {
             label: 'User to endorse the task'
         }) }}
         {{ form_row(tasknewform.date , {
@@ -61,7 +62,7 @@
     <h3>
         Teacher :
         {% if isTeacher == false  %}
-        {{ teacher.GetFirstName() | lower | capitalize}} {{ teacher.GetFirstName() | upper }}
+         {{ teacher.GetFirstName() | lower | capitalize}} {{ teacher.GetLastName() | upper }}
         {%else%}
         You !
         {% endif %}
