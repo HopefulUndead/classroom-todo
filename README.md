@@ -3,6 +3,10 @@ Projet d'apprentissage backend d'une semaine afin de me familiariser avec le dé
 
 Le site permet de créer des classes et l'enseignant peut ensuite assigner des tâches aux étudiants.
 
+Le site est utilisable bien que les tests unitaires seraient a ajouter et qu'il y a quelques warnings a corriger, mais étant un projet purement éducatif je referais surement le projet avec plus de rigeur.
+
+
+
 ## ToDo donnée en début de projet
 * [x] Docker(facultatif) au début du projet
 * [x] systeme de classe scolaire
@@ -22,14 +26,22 @@ Le site permet de créer des classes et l'enseignant peut ensuite assigner des t
 *  Authentification et sécurité symofony (login, roles)
 
 ## Installation
+Symfony et composer doivent déjà être installés.
+Recommandé d'installer sur une configuration linux sinon VRAIMENT lent...
 
 ```bash
 git clone https://github.com/HopefulUndead/classroom-todo
 cd classroom-todo
-docker compose up --build
-docker compose up -d 
+composer install
+docker compose up -d --build 
 ```
 le .env.local a été **exceptionnelement** rendu publique pour un usage sans configuration.
+
+## Images
+![alt text](https://github.com/HopefulUndead/classroom-todo/blob/master/img/Screenshot%202025-05-16%20at%2011-03-39%20Classroom%20Todo.png)
+![alt text](https://github.com/HopefulUndead/classroom-todo/blob/master/img/Screenshot%202025-05-16%20at%2011-03-46%20Classroom%20Todo.png)
+
+![alt text](https://github.com/HopefulUndead/classroom-todo/blob/master/img/Screenshot%202025-05-16%20at%2011-03-52%20Classroom%20Todo.png)
 
 ## Stack
 * Docker Desktop
@@ -38,23 +50,3 @@ le .env.local a été **exceptionnelement** rendu publique pour un usage sans co
 * Apache
 * MSQL
 * PHPMyAdmin
-
-### Symfony debug\:config , Bundles utilisés
-
-Bundle name                Extension alias
----
-
-DebugBundle                debug
-DoctrineBundle             doctrine
-DoctrineMigrationsBundle   doctrine\_migrations
-FrameworkBundle            framework
-MakerBundle                maker
-MonologBundle              monolog
-SecurityBundle             security
-StimulusBundle             stimulus
-TurboBundle                turbo
-TwigBundle                 twig
-TwigExtraBundle            twig\_extra
-WebProfilerBundle          web\_profiler
-
----
