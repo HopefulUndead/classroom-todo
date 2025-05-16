@@ -40,6 +40,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 20)]
     private ?string $first_name = null;
 
+    #[ORM\OneToMany(mappedBy: 'TeacherId', targetEntity: Classroom::class)]
+    private Collection $classroomsWhereIsTeacher;
+
     /**
      * @var Collection <int, Classroom>
      */

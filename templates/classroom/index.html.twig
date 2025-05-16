@@ -20,12 +20,17 @@
     </h2>
 
     <ul>
-    {% for classroom in classrooms %}
-    <li>
-        <a href="{{ path('classroom_show', {id: classroom.id}) }}">
-                    {{ classroom.name }}
-                </a>
-            </li>
+        {% for classroom in classrooms %}
+        <li>
+            <a href="{{ path('classroom_show', {id: classroom.classroom.id}) }}">
+                        {{ classroom.classroom.name }}
+            </a>
+            {% if classroom.userIsOwner == true  %}
+           <a class="btn btn-danger" href="{{ path('classroom_delete', {id: classroom.classroom.id}) }}">
+                Delete
+           </a>
+            {% endif %}
+        </li>
         {% else %}
             <li> You aren't part of any classrooms, please contact your school administrator if you think it's an mistake </li>
         {% endfor %}

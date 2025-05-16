@@ -26,7 +26,7 @@ class Task
     #[ORM\Column(type: 'date')]
     private ?\DateTimeInterface $date = null;
     #[ORM\ManyToOne(inversedBy: 'Task')]
-    #[ORM\JoinColumn(name: 'CLASSROOM_ID', nullable: false)]
+    #[ORM\JoinColumn(name: 'CLASSROOM_ID', nullable: false, onDelete: 'CASCADE')]
     private ?Classroom $classId = null;
 
 

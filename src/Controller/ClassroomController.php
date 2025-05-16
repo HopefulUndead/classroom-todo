@@ -48,11 +48,37 @@
         #[Route('/classroom', name: 'classroom_index')]
         public function index(): Response
         {
-            $classrooms = $this->getUser()->getClassrooms();
+            $classroomsRaw = $this->getUser()->getClassrooms();
+
+            $classrooms = [];
+            foreach ($classroomsRaw as $classroom)
+            {
+                    $classrooms[] = [
+                    'classroom' => $classroom,
+                    'userIsOwner' => $classroom->getTeacherId()->getId() == $this->getUser()->getId()
+                    ];
+            }
 
             return $this->render('classroom/index.html.twig', [
                 'classrooms' => $classrooms,
             ]);
+        }
+        #[Route('/classroom/delete/{id}', name: 'classroom_delete', methods: ['GET'])]
+        public function delete(int $id, EntityManagerInterface $em): Response
+        {
+           $this->checkUserIsInClassroom($id);
+
+           $classroom = $em->getRepository(Classroom::class)->find($id);
+           if ($classroom->getTeacherId()->getId() != $this->getUser()->getId())
+               return throw new AccessDeniedException();
+
+            //https://symfony.com/doc/current/doctrine.html#deleting-an-object
+            $em->remove($classroom);
+            $em->flush();
+
+            $this->addFlash('success', 'Classroom has been deleted !');
+
+            return $this->redirectToRoute('classroom_index');
         }
 
         #[Route('/classroom/create', name: 'classroom_create')]
@@ -148,7 +174,7 @@
 
                     $this->addFlash(
                         'success',
-                        'Congrats ! You finished a task !'
+                        'Congrats ! You created a task !'
                     );
                     return $this->redirectToRoute('classroom_show', ['id' => $id]);
                 }
