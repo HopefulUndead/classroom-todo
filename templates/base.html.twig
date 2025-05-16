@@ -9,50 +9,57 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
 
     </head>
-    <body>
-        <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
-            <div class="col-md-3 mb-2 mb-md-0">
-                <a href="{{ path('app_home') }}" class="d-inline-flex link-body-emphasis text-decoration-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="32" fill="currentColor" class="bi bi-marker-tip" viewBox="0 0 16 16">
-                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-4.5 6.064-1.281-4.696A.5.5 0 0 0 9.736 9H6.264a.5.5 0 0 0-.483.368l-1.28 4.696A6.97 6.97 0 0 0 8 15c1.275 0 2.47-.34 3.5-.936m.873-.598a7 7 0 1 0-8.746 0l1.19-4.36a1.5 1.5 0 0 1 1.31-1.1l1.155-3.851c.213-.713 1.223-.713 1.436 0l1.156 3.851a1.5 1.5 0 0 1 1.31 1.1z"/>
-                    </svg>
-                    <p>
-                        Classroom Todo
-                    </p>
-                </a>
-            </div>
+    <body class="d-flex flex-column min-vh-100">
+    <header class="border-bottom py-3 mb-4">
+        <div class="container d-flex align-items-center justify-content-between">
 
-            <div class="col-md-3 text-end">
+            {# ─────────── Logo & titre ─────────── #}
+            <a href="{{ path('app_home') }}"
+               class="d-inline-flex align-items-center gap-2 text-body text-decoration-none">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     width="32" height="26" fill="currentColor"
+                     class="bi bi-marker-tip" viewBox="0 0 16 16">
+                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-4.5 6.064-1.281-4.696A.5.5 0 0 0 9.736 9H6.264a.5.5 0 0 0-.483.368l-1.28 4.696A6.97 6.97 0 0 0 8 15c1.275 0 2.47-.34 3.5-.936m.873-.598a7 7 0 1 0-8.746 0l1.19-4.36a1.5 1.5 0 0 1 1.31-1.1l1.155-3.851c.213-.713 1.223-.713 1.436 0l1.156 3.851a1.5 1.5 0 0 1 1.31 1.1z"/>
+                </svg>
+                <span class="fs-4 fw-semibold">Classroom&nbsp;Todo</span>
+            </a>
+
+            {# ─────────── Zone utilisateur ─────────── #}
+            <div class="d-flex flex-column flex-sm-row align-items-center gap-2">
+
                 {% if is_granted('IS_AUTHENTICATED') %}
-                    <div class="mb-3">
-                            Glad to see you {{ app.user.firstName|lower|capitalize }} {{ app.user.lastName| upper }} !
-                        <a href="{{ path('app_logout') }}" class="btn btn-outline-primary m-2">
-                            Logout
-                        </a>
-                    </div>
+                    <span class="me-sm-3">
+                    Glad to see you&nbsp;
+                    {{ app.user.firstName|lower|capitalize }}
+                        {{ app.user.lastName|upper }}&nbsp;!
+                </span>
+
+                    <a href="{{ path('app_logout') }}" class="btn btn-outline-primary btn-sm">
+                        Logout
+                    </a>
+
                 {% else %}
-                    <p>
-                        Please authenticate to access your Classroom !
-                    </p>
-                    <a href="{{ path('app_login') }}" class="btn btn-outline-primary me-2">
+                    <a href="{{ path('app_login') }}" class="btn btn-outline-primary btn-sm me-sm-2">
                         Login
                     </a>
-                    <a href="{{ path('app_register') }}" class="btn btn-primary">
+                    <a href="{{ path('app_register') }}" class="btn btn-primary btn-sm">
                         Sign-up
                     </a>
                 {% endif %}
             </div>
-        </header>
+        </div>
+    </header>
 
-        <main>
-            {% block body %}
-            {% endblock %}
-        </main>
+    <main class="flex-grow-1">
+        {% block body %}
+        {% endblock %}
+    </main>
 
-        <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
-            <p class="col-md-4 mb-0 text-muted">
-                © 2021 Company, Inc
-            </p>
-        </footer>
+    <footer class="mt-auto d-flex flex-wrap justify-content-between align-items-center py-3 border-top">
+        <span class="d-inline-flex align-items-center gap-2 ">
+            {{ "now"|date("Y") }} Company, Inc
+        </span>
+    </footer>
+
     </body>
 </html>

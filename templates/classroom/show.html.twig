@@ -1,12 +1,11 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-        {% if isTeacher %}
-          <span class="badge text-bg-primary">Teacher only pannel</span>
-        {% endif %}
     <h1>
        {{ classroom.GetName() }}'s Classroom
     </h1>
+
+    <br>
 
     {% for type,messages in app.flashes %}
         {% for message in messages %}
@@ -16,84 +15,101 @@
         {% endfor %}
     {% endfor %}
 
-    <div class="container">
-        <div class="row">
-            <div class="col-sm">
-                <h2>
-                    Today's Task
-                </h2>
-                <ul>
-                    {% for task in tasks %}
-                        <li>
-                            <form action="{{ path('classroom_task_check',{idClassroom:classroom.GetId(), taskId:task.id}) }}">
-                                <input type="checkbox" id="{{ task.id }}" name="{{ task.id }}" onchange="this.form.submit();">
-                                <label for="{{ task.id }}">
-                                    {{ task.name }} :  {{ task.nameUser }} : due the : {{ task.date |date("l d F Y") }}
-                                </label>
-                            </form>
-                        </li>
+    <div class="container-fluid">
+        <div class="row g-3">
+
+            {# ─────────── Card : Today’s tasks ─────────── #}
+            <div class="col-12 col-md">
+                <div class="card h-100 border-primary">
+                    <div class="card-header bg-primary bg-opacity-10">
+                        Today’s tasks
+                    </div>
+
+                    {% if tasks is not empty %}
+                        <ul class="list-group list-group-flush">
+                            {% for task in tasks %}
+                                <li class="list-group-item d-flex gap-2 align-items-start">
+                                    <form
+                                            action="{{ path('classroom_task_check',
+                                                { idClassroom: classroom.id, taskId: task.id }) }}"
+                                            method="post" class="m-0">
+                                        <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                onchange="this.form.submit();">
+                                    </form>
+
+                                    <label class="flex-grow-1">
+                                        <span class="fw-semibold">{{ task.name }}</span><br>
+                                        <small class="text-muted">
+                                            {{ task.nameUser }} — due {{ task.date|date('d/m/Y') }}
+                                        </small>
+                                    </label>
+                                </li>
+                            {% endfor %}
+                        </ul>
                     {% else %}
-                        <p> No tasks for this class </p>
-                    {% endfor %}
-                </ul>
+                        <div class="card-body">
+                            <p class="mb-0">No task for this class.</p>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
 
+            {# ─────────── Card : Create a new task (prof only) ─────────── #}
             {% if isTeacher %}
-            <div class="col-sm">
-                {{ form_errors(tasknewform) }}
-
-                <h2>
-                    Create a new task :
-                </h2>
-                {{ form_start(tasknewform) }}
-
-                {{ form_row(tasknewform.name, {
-                    label: "Task's Description :"
-                }) }}
-                {{ form_row(tasknewform.userId , {
-                    label: 'User to endorse the task'
-                }) }}
-                {{ form_row(tasknewform.date , {
-                    label: 'Due date'
-                }) }}
-
-
-                <button type="submit" class="btn btn-lg btn-primary"> Add new Task </button>
-                {{ form_end(tasknewform) }}
-            </div>
+                <div class="col-12 col-md-auto">
+                    <div class="card h-100 border-warning">
+                        <div class="card-header bg-warning bg-opacity-10">
+                            Create a new task <span class="badge bg-secondary">Teacher</span>
+                        </div>
+                        <div class="card-body">
+                            {{ form_start(tasknewform) }}
+                            {{ form_row(tasknewform.name,   { label: "Name"     }) }}
+                            {{ form_row(tasknewform.userId, { label: "Assignee" }) }}
+                            {{ form_row(tasknewform.date,   { label: "Due date" }) }}
+                            <button class="btn btn-primary w-100 mt-2">Add task</button>
+                            {{ form_end(tasknewform) }}
+                        </div>
+                    </div>
+                </div>
             {% endif %}
 
-            <div class="col-sm">
-                <h2>
-                    Classroom's members
-                </h2>
-                <h3>
-                    Teacher :
-                    {% if isTeacher == false  %}
-                     {{ teacher.GetFirstName() | lower | capitalize}} {{ teacher.GetLastName() | upper }}
-                    {%else%}
-                    You !
-                    {% endif %}
-                </h3>
-                <h3>
-                    Students :
-                </h3>
-                <ul>
-                    {% for student in students %}
-                        {% if  student %}
-                            <li>
-                                {{ student.GetFirstName() | lower | capitalize}} {{ student.GetLastName() | upper }}
-                            </li>
-                        {% endif %}
-                    {% else %}
-                        <p>
-                            There's no student in this class.
+            {# ─────────── Card : Classroom members ─────────── #}
+            <div class="col-12 col-md">
+                <div class="card h-100 border-primary">
+                    <div class="card-header bg-primary bg-opacity-10">
+                        Classroom members
+                    </div>
+                    <div class="card-body">
+                        <p class="fw-semibold mb-2">
+                            Teacher :
+                            {% if isTeacher %}
+                                You
+                            {% else %}
+                                {{ teacher.firstName|capitalize }} {{ teacher.lastName|upper }}
+                            {% endif %}
                         </p>
-                    {% endfor %}
-                </ul>
+
+                        <p class="fw-semibold mb-1">Students :</p>
+                        {% if students|length > 0 %}
+                            <ul class="list-group list-group-flush">
+                                {% for student in students %}
+                                    <li class="list-group-item py-1">
+                                        {{ student.firstName|capitalize }} {{ student.lastName|upper }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="mb-0">No student in this class.</p>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
+
         </div>
     </div>
+
 
 
 {% endblock %}
