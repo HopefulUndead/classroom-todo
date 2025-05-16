@@ -3,4 +3,5 @@ twig:
 
 when@test:
     twig:
+        form_themes: ['bootstrap_5_horizontal_layout.html.twig'] # https://symfony.com/doc/current/form/form_themes.html#applying-themes-to-all-forms
         strict_variables: true
