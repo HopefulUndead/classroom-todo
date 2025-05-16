@@ -1,12 +1,13 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
+        {% if isTeacher %}
+          <span class="badge text-bg-primary">Teacher only pannel</span>
+        {% endif %}
     <h1>
        {{ classroom.GetName() }}'s Classroom
     </h1>
-    <h2>
-        Today's Task (à modif date)
-    </h2>
+
     {% for type,messages in app.flashes %}
         {% for message in messages %}
             <div class="alert alert-{{ type }}" role="alert">
@@ -14,75 +15,85 @@
             </div>
         {% endfor %}
     {% endfor %}
-    <ul>
-        {% for task in tasks %}
-            <li>
-                <form action="{{ path('classroom_task_check',{idClassroom:classroom.GetId(), taskId:task.id}) }}">
-                    <input type="checkbox" id="{{ task.id }}" name="{{ task.id }}" onchange="this.form.submit();">
-                    <label for="{{ task.id }}">
-                        {{ task.name }} :  {{ task.nameUser }} : due the : {{ task.date |date("l d F Y") }}
-                    </label>
-                </form>
-            </li>
-        {% else %}
-            <p> No tasks for this class </p>
-        {% endfor %}
-    </ul>
 
-    {% if isTeacher %}
-    <div>
-        {{ form_errors(tasknewform) }}
+    <div class="container">
+        <div class="row">
+            <div class="col-sm">
+                <h2>
+                    Today's Task
+                </h2>
+                <ul>
+                    {% for task in tasks %}
+                        <li>
+                            <form action="{{ path('classroom_task_check',{idClassroom:classroom.GetId(), taskId:task.id}) }}">
+                                <input type="checkbox" id="{{ task.id }}" name="{{ task.id }}" onchange="this.form.submit();">
+                                <label for="{{ task.id }}">
+                                    {{ task.name }} :  {{ task.nameUser }} : due the : {{ task.date |date("l d F Y") }}
+                                </label>
+                            </form>
+                        </li>
+                    {% else %}
+                        <p> No tasks for this class </p>
+                    {% endfor %}
+                </ul>
+            </div>
 
-        <h2>
-            Create a new task : (Teacher Only Panel)
-        </h2>
-        {{ form_start(tasknewform) }}
+            {% if isTeacher %}
+            <div class="col-sm">
+                {{ form_errors(tasknewform) }}
 
-        {{ form_row(tasknewform.name, {
-            label: "Task's Description :"
-        }) }}
-        {{ form_row(tasknewform.userId , {
-            label: 'User to endorse the task'
-        }) }}
-        {{ form_row(tasknewform.date , {
-            label: 'Due date'
-        }) }}
+                <h2>
+                    Create a new task :
+                </h2>
+                {{ form_start(tasknewform) }}
+
+                {{ form_row(tasknewform.name, {
+                    label: "Task's Description :"
+                }) }}
+                {{ form_row(tasknewform.userId , {
+                    label: 'User to endorse the task'
+                }) }}
+                {{ form_row(tasknewform.date , {
+                    label: 'Due date'
+                }) }}
 
 
-        <button type="submit" class="btn btn-lg btn-primary"> Add new Task </button>
-        {{ form_end(tasknewform) }}
-    </div>
-    {% endif %}
-
-    <hr>
-
-    <h2>
-        Classroom's members
-    </h2>
-    <h3>
-        Teacher :
-        {% if isTeacher == false  %}
-         {{ teacher.GetFirstName() | lower | capitalize}} {{ teacher.GetLastName() | upper }}
-        {%else%}
-        You !
-        {% endif %}
-    </h3>
-    <h3>
-        Students :
-    </h3>
-    <ul>
-        {% for student in students %}
-            {% if  student %}
-                <li>
-                    {{ student.GetFirstName() | lower | capitalize}} {{ student.GetLastName() | upper }}
-                </li>
+                <button type="submit" class="btn btn-lg btn-primary"> Add new Task </button>
+                {{ form_end(tasknewform) }}
+            </div>
             {% endif %}
-        {% else %}
-            <p>
-                There's no student in this class.
-            </p>
-        {% endfor %}
-    </ul>
+
+            <div class="col-sm">
+                <h2>
+                    Classroom's members
+                </h2>
+                <h3>
+                    Teacher :
+                    {% if isTeacher == false  %}
+                     {{ teacher.GetFirstName() | lower | capitalize}} {{ teacher.GetLastName() | upper }}
+                    {%else%}
+                    You !
+                    {% endif %}
+                </h3>
+                <h3>
+                    Students :
+                </h3>
+                <ul>
+                    {% for student in students %}
+                        {% if  student %}
+                            <li>
+                                {{ student.GetFirstName() | lower | capitalize}} {{ student.GetLastName() | upper }}
+                            </li>
+                        {% endif %}
+                    {% else %}
+                        <p>
+                            There's no student in this class.
+                        </p>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
 
 
 {% endblock %}
